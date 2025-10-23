@@ -1,0 +1,19 @@
+# === Core AI Orchestration ===
+crewai>=0.36.0
+crewai-tools>=0.2.5
+
+# === Data validation & models ===
+pydantic>=2.7.0
+PyYAML>=6.0.1
+
+# === Frontend / UI Demo ===
+gradio>=4.36.0
+
+# === Utility / Optional Enhancements ===
+requests>=2.31.0
+tqdm>=4.66.0
+rich>=13.7.0          # For prettier terminal output/logs
+
+# === Linting & Dev (Optional) ===
+black>=24.4.0
+flake8>=7.0.0
