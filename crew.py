@@ -2,6 +2,14 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from pydantic import BaseModel, Field
 from typing import List, Optional
+# from crewai.memory import LocalMemory
+
+# memory = LocalMemory(
+#     session_id="coordinator_session",
+#     memory_type="conversation",
+#     memory_format="markdown",
+#     max_entries=100,
+# )
 
 # ---------------------
 # Define Pydantic schemas
@@ -121,6 +129,7 @@ class HaileiCrew():
             agents=[self.coordinator_agent()],
             tasks=[self.coordination_task()],    # collected automatically HAILEI requires coordination
             verbose=True,
+            memory=True,
         )
 
     def kickoff(self, course_request: dict):

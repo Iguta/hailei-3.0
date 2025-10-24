@@ -1,5 +1,15 @@
 import gradio as gr
+import os
+from dotenv import load_dotenv
 from crew import HaileiCrew
+
+from models.course_request import CourseRequest
+from models.cordinator_state import CoordinatorState
+
+coordinator_state = CoordinatorState()
+
+# Load environment variables from .env file
+load_dotenv()
 
 # ------------------------------------------
 # Initialize HAILEI Crew (Coordinator only)
@@ -10,7 +20,7 @@ crew = hailei_crew.crew()
 # ------------------------------------------
 # Global session course storage
 # ------------------------------------------
-session_course_request = {}
+coordinator_state = CoordinatorState()  # initialize the coordinator state
 
 
 # ------------------------------------------
@@ -36,41 +46,33 @@ def run_coordinator_agent(course_title, description, credits, duration_weeks, le
     if errors:
         return "\n".join(errors), None, gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
 
-    # --- Store input globally ---
-    global session_course_request
-    session_course_request = {
-        "course_title": course_title.strip(),
-        "course_description": description.strip(),
-        "course_credits": int(credits),
-        "course_duration_weeks": int(duration_weeks),
-        "course_level": level,
-        "course_expectations": expectations.strip(),
-        "course_modules": []
-    }
-    print("[DEBUG] Session course request: ", session_course_request)
-    # --- Run the Coordinator ---
-    result = crew.kickoff(inputs={"course_request": session_course_request})
-    print(result)
-    reply = getattr(result, "raw_output", str(result))
 
-    # --- Fallback if LLM returns empty ---
-    if not reply or reply.strip() == "":
-        reply = (
-            f"🧠 Thank you for submitting your course **{course_title.strip()}**!\n\n"
-            "Let’s go over a few details to make sure I understand your course intent correctly."
+    global coordinator_state
+
+    try:
+        request = CourseRequest(
+            course_title=course_title,
+            course_description=description,
+            course_credits=int(credits),
+            course_duration_weeks=int(duration_weeks),
+            course_level=level,
+            course_expectations=expectations,
         )
+    except Exception as e:
+        return f"⚠️ Validation Error: {str(e)}", None, gr.update(visible=True)
+
+
+    coordinator_state.reset()
+    coordinator_state.course_request = request
+
+    response = crew.kickoff(inputs=coordinator_state.dict())
+
+    reply = getattr(response, "raw_output", str(response))
+    coordinator_state.add_assistant_message(reply)
 
     history = [("assistant", reply)]
 
-    # Hide form, show chat
-    return (
-        "",  # clear message
-        history,  # chat history
-        gr.update(visible=True),  # show chatbot
-        gr.update(visible=True),  # show user input
-        gr.update(visible=True),  # show send_btn
-        gr.update(visible=False), # hide form
-    )
+    return "", history, gr.update(visible=True), gr.update(visible=True), gr.update(visible=True), gr.update(visible=False)
 
 
 # ------------------------------------------
@@ -78,22 +80,29 @@ def run_coordinator_agent(course_title, description, credits, duration_weeks, le
 # ------------------------------------------
 def coordinator_chat(message, history):
     """Continue Coordinator conversation after form submission."""
-    global session_course_request
+    global coordinator_state
 
-    if not session_course_request:
+    if not coordinator_state.course_request:
         history.append(("assistant", "⚠️ Please submit the course form first."))
         return "", history
 
     # Approve → end of Coordinator phase
     if message.strip().lower() == "approve":
         history.append(("user", message))
-        history.append(("assistant", "✅ Approved! I’ll now prepare to delegate this to IPDAi for instructional design."))
+        history.append(("assistant", "✅ Approved! I'll now prepare to delegate this to IPDAi for instructional design."))
         return "", history
 
-    # Otherwise, normal dialogue
-    response = crew.kickoff(inputs={"course_request": {**session_course_request, "user_message": message}})
+    # Add user message to conversation history
+    coordinator_state.add_user_message(message)
+    
+    # Continue the conversation with context
+    response = crew.kickoff(inputs=coordinator_state.dict())
     reply = getattr(response, "raw_output", str(response))
 
+    # Add assistant response to conversation history
+    coordinator_state.add_assistant_message(reply)
+    
+    # Update Gradio history
     history.append(("user", message))
     history.append(("assistant", reply))
     return "", history
@@ -156,7 +165,7 @@ with gr.Blocks(title="🎓 HAILEI 3.0 - Coordinator Agent") as demo:
         visible=False
     )
 
-    send_btn = gr.Button("💬 Send Message", visible=False)
+    send_btn = gr.Button("Send Message", visible=False)
 
     send_btn.click(
         coordinator_chat,

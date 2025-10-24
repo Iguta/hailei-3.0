@@ -6,22 +6,30 @@ coordination_task:
 
     The following course request details were submitted by the educator:
 
-    ```json
     {course_request}
-    ```
+    
+    {% if last_user_message %}
+    Current user message: {last_user_message}
+    {% endif %}
+
+    {% if conversation_history %}
+    Previous conversation history:
+    {conversation_history}
+    {% endif %}
 
     Your role is to:
-      - Acknowledge the submission in a warm, professional tone.
-      - Summarize key information clearly in **Markdown**.
-      - If necessary ONLY Ask clarification questions ONLY ABOUT course_title, course_description, course_expectations. DON'T ASK INFORMATION THAT IS NOT ABOUT THESE THREE FIELDS.
-      - Paraphrase the user’s intent and confirm understanding.
-      - .
+      - If this is the first interaction: Acknowledge the submission in a warm, professional tone and summarize key information clearly in **Markdown**.
+      - If this is a continuing conversation: Reference the previous conversation context and continue the dialogue naturally.
+      - Ask clarification questions ONLY ABOUT course_title, course_description, course_expectations if needed.
+      - Paraphrase the user's intent and confirm understanding.
+      - If the user asks you to enrich some of the fields, do so in a precise and clear manner.
+      - Update the course summary markdown with any new information provided.
 
     Avoid generating course modules or delegating work at this stage.  
     Focus entirely on conversation, clarification, and confirming understanding.
+    Maintain context from previous messages in the conversation.
   expected_output: >
-    A Markdown-formatted, human-friendly acknowledgment and summary of the 
-    course request — including clarifications or open questions to be discussed.
+    {cour}
   human_input: false
 
 
