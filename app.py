@@ -1,7 +1,9 @@
 import gradio as gr
 import os
+import json, re
 from dotenv import load_dotenv
 from crew import HaileiCrew
+
 
 from models.course_request import CourseRequest
 from models.cordinator_state import CoordinatorState
@@ -26,11 +28,13 @@ coordinator_state = CoordinatorState()  # initialize the coordinator state
 # ------------------------------------------
 # Step 1: Form submission → Coordinator kickoff
 # ------------------------------------------
+
+
 def run_coordinator_agent(course_title, description, credits, duration_weeks, level, expectations):
     """Validate input and start Coordinator Agent conversation."""
     errors = []
 
-    # --- Validation Rules ---
+    # --- Validation ---
     if not course_title or len(course_title.strip()) < 5:
         errors.append("⚠️ Course title must be at least 5 characters long.")
     if not description or len(description.strip()) < 15:
@@ -42,37 +46,56 @@ def run_coordinator_agent(course_title, description, credits, duration_weeks, le
     if not isinstance(duration_weeks, (int, float)) or duration_weeks <= 0:
         errors.append("⚠️ Duration (weeks) must be greater than 0.")
 
-    # --- If validation fails ---
     if errors:
         return "\n".join(errors), None, gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
 
+    # --- Build initial CourseRequest ---
+    course_request_data = {
+        "course_title": course_title.strip(),
+        "course_description": description.strip(),
+        "course_credits": int(credits),
+        "course_duration_weeks": int(duration_weeks),
+        "course_level": level,
+        "course_expectations": expectations.strip(),
+        "course_modules": []
+    }
 
-    global coordinator_state
-
-    try:
-        request = CourseRequest(
-            course_title=course_title,
-            course_description=description,
-            course_credits=int(credits),
-            course_duration_weeks=int(duration_weeks),
-            course_level=level,
-            course_expectations=expectations,
-        )
-    except Exception as e:
-        return f"⚠️ Validation Error: {str(e)}", None, gr.update(visible=True)
-
-
+    # Initialize coordinator state
     coordinator_state.reset()
-    coordinator_state.course_request = request
+    coordinator_state.course_request = CourseRequest(**course_request_data)
+    print("[DEBUG] Initial course_request:", coordinator_state.course_request.dict())
 
+    # --- Kick off Coordinator ---
     response = crew.kickoff(inputs=coordinator_state.dict())
+    raw_reply = getattr(response, "raw_output", str(response))
 
-    reply = getattr(response, "raw_output", str(response))
-    coordinator_state.add_assistant_message(reply)
+    # --- Extract JSON from reply ---
+    json_match = re.search(r"```json\s*(\{.*?\})\s*```", raw_reply, re.DOTALL)
+    if json_match:
+        try:
+            updates = json.loads(json_match.group(1))
+            coordinator_state.course_request = coordinator_state.course_request.copy(update=updates)
+            print("[DEBUG] Updated CourseRequest:", coordinator_state.course_request.dict())
+            display_reply = raw_reply.replace(json_match.group(0), "").strip()
+        except Exception as e:
+            print("[WARN] Could not parse JSON from coordinator:", e)
+            display_reply = raw_reply
+    else:
+        display_reply = raw_reply
 
-    history = [("assistant", reply)]
+    # --- Initialize conversation history ---
+    coordinator_state.add_assistant_message(display_reply)
+    history = [("assistant", display_reply)]
 
-    return "", history, gr.update(visible=True), gr.update(visible=True), gr.update(visible=True), gr.update(visible=False)
+    # --- Hide form and show chat ---
+    return (
+        "",  # clear validation msg
+        history,
+        gr.update(visible=True),   # chatbot visible
+        gr.update(visible=True),   # textbox visible
+        gr.update(visible=True),   # send_btn visible
+        gr.update(visible=False),  # hide form
+    )
 
 
 # ------------------------------------------
@@ -94,18 +117,42 @@ def coordinator_chat(message, history):
 
     # Add user message to conversation history
     coordinator_state.add_user_message(message)
-    
-    # Continue the conversation with context
-    response = crew.kickoff(inputs=coordinator_state.dict())
-    reply = getattr(response, "raw_output", str(response))
 
-    # Add assistant response to conversation history
-    coordinator_state.add_assistant_message(reply)
-    
-    # Update Gradio history
+    response = crew.kickoff(inputs=coordinator_state.dict())
+
+    raw_reply = getattr(response, "raw_output", str(response))
+
+    # --- Split conversational Markdown vs JSON ---
+    json_match = re.search(r"```json\s*(\{.*?\})\s*```", raw_reply, re.DOTALL)
+
+    if json_match:
+        try:
+            updates = json.loads(json_match.group(1))
+            # Apply updates to course_request
+            if coordinator_state.course_request:
+                coordinator_state.course_request = coordinator_state.course_request.copy(update=updates)
+            else:
+                from models.course_request import CourseRequest
+                coordinator_state.course_request = CourseRequest(**updates)
+            print("[DEBUG] Updated course_request:", coordinator_state.course_request.dict())
+
+            # Remove the JSON block from what user sees
+            display_reply = raw_reply.replace(json_match.group(0), "").strip()
+
+        except Exception as e:
+            print("[WARN] Could not parse JSON:", e)
+            display_reply = raw_reply
+    else:
+        display_reply = raw_reply
+
+    # --- Update conversation state ---
+    coordinator_state.add_assistant_message(display_reply)
+
+    # --- Update Gradio chat ---
     history.append(("user", message))
-    history.append(("assistant", reply))
+    history.append(("assistant", display_reply))
     return "", history
+
 
 
 # ------------------------------------------

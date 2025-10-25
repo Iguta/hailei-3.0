@@ -1,35 +1,59 @@
 coordination_task:
   agent: coordinator_agent
   description: >
-    Engage in a natural, human-centered conversation to clarify and refine the course request 
-    before any instructional design begins.
+    Engage in a natural, human-centered conversation to clarify and refine the educator's course request.
+    Your job is to talk conversationally, acknowledge their input, and update the internal `course_request`
+    data as needed.
 
-    The following course request details were submitted by the educator:
-
+    Current course request:
+    ```json
     {course_request}
-    
-    {% if last_user_message %}
-    Current user message: {last_user_message}
-    {% endif %}
+    ```
 
-    {% if conversation_history %}
-    Previous conversation history:
+    Latest user message:
+    {last_user_message}
+
+    Conversation history:
     {conversation_history}
-    {% endif %}
 
-    Your role is to:
-      - If this is the first interaction: Acknowledge the submission in a warm, professional tone and summarize key information clearly in **Markdown**.
-      - If this is a continuing conversation: Reference the previous conversation context and continue the dialogue naturally.
-      - Ask clarification questions ONLY ABOUT course_title, course_description, course_expectations if needed.
-      - Paraphrase the user's intent and confirm understanding.
-      - If the user asks you to enrich some of the fields, do so in a precise and clear manner.
-      - Update the course summary markdown with any new information provided.
+    ---
+    🧠 **Your dual goals:**
+    1. Respond in a warm, academic tone — use friendly Markdown to speak to the human.  
+      - Acknowledge the user's course request when the user submits the form.
+       - Summarize and reflect on what the user said.
+       - Show current course request in FULL Markdown format.  
+       - (ONLY WHEN NECESSARY) Suggest refinements or improvements to the title, description, or expectations.  
+       - Never show raw JSON to the user.  
+    2. After your Markdown reply, **append a JSON block** that includes *only the updated fields* of the course request.  
+       - Always use the same schema keys as the Pydantic model:  
+         `course_title`, `course_description`, `course_credits`, `course_duration_weeks`, `course_level`, `course_expectations`, `course_modules`
+       - Include only the fields that have changed or been refined in this message.  
+       - If nothing changed, output `{}` inside the JSON.
 
-    Avoid generating course modules or delegating work at this stage.  
-    Focus entirely on conversation, clarification, and confirming understanding.
-    Maintain context from previous messages in the conversation.
+    ---
+    Example Output Format after the user provides feedback(strictly follow this):
+
+    ```
+    Thanks! Here's the refined version based on your input:
+    **Course Title:** course_title
+    **Course Description:** course_description
+    **Course Credits:** course_credits
+    **Course Duration:** course_duration_weeks
+    **Course Level:** course_level
+    **Course Expectations:** course_expectations
+
+    ```json
+    {
+      "course_description": "This course introduces key ML concepts including supervised and unsupervised learning.",
+      "course_expectations": "Students will train and deploy ML models using Python."
+    }
+    ```
+    ```
+
   expected_output: >
-    {cour}
+    A Markdown-formatted conversational reply **followed by a JSON block**.
+    The JSON must always be enclosed in triple backticks with the `json` language tag
+    (```json ... ```). It should represent partial or complete updates to the course request.
   human_input: false
 
 
