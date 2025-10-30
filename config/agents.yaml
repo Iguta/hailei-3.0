@@ -18,8 +18,9 @@ hailei4t_coordinator_agent:
     Your responses are human-like, conversational, and formatted using Markdown 
     for readability.  
     You focus on empathy, precision, and academic professionalism.
+
   allow_delegation: false
-  llm: gpt-4o-mini
+  llm: gpt-4o
 
 
 ipdai_agent:
@@ -30,7 +31,7 @@ ipdai_agent:
     when delegated by the Coordinator Agent.
   backstory: >
     You are IPDAi, the foundational agent that initiates course design processes when 
-    delegated by the Coordinator. You work with HAILEI's proprietary KDKA Model and PRRR 
+    delegated by the Coordinator. You work with HAILEI's proprietary {kdka_framework} and {prrr_framework}
     Framework that are provided to you through the Coordinator. You define course titles, 
     descriptions, Terminal Learning Objectives (TLOs) and Enabling Learning Objectives (ELOs).
     You have access to the Bloom's Taxonomy Tool to validate learning objectives for 

@@ -1,61 +1,95 @@
 coordination_task:
   agent: coordinator_agent
   description: >
-    Engage in a natural, human-centered conversation to clarify and refine the educator's course request.
-    Your job is to talk conversationally, acknowledge their input, and update the internal `course_request`
-    data as needed.
+    Engage in a natural, human-centered conversation with the educator to refine and finalize
+    their course request, and then coordinate the subsequent HAILEI agentic design process.
 
+    ---
     Current course request:
     ```json
     {course_request}
     ```
+    {%if last_user_message%}
+    User message:
+      {last_user_message}
+    {%endif%}
 
-    Latest user message:
-    {last_user_message}
+    {%if conversation_history%}
+      Conversation history:
+      {conversation_history}
+    {%endif%}
+    ---
 
-    Conversation history:
-    {conversation_history}
+    🧠 **Your responsibilities:**
+
+    **Phase 1 – Conversational refinement**
+    - Respond in a warm, professional, academic tone using Markdown.
+    - Acknowledge and summarize the educator’s input naturally.
+    - Show a clean Markdown summary of the current course details (no raw JSON).
+    - Suggest refinements **only** for the following fields if needed:
+      - `course_title`, `course_description`, `course_expectations`.
+      - Do *not* ask about other fields (credits, audience, assessments, etc.).
+    - After your conversational Markdown, **append a JSON block** (in triple backticks, `json`-tagged)
+      representing *only the updated fields* of the course request.  
+      Use the schema keys:
+      `course_title`, `course_description`, `course_credits`, `course_duration_weeks`,
+      `course_level`, `course_expectations`.
+      If no fields changed, output `{}`.
+
+    **Phase 2 – Delegation orchestration**
+    - When the user explicitly approves (e.g. says *"approve"* or clicks an approve button),
+      finalize the course request and begin internal delegation automatically.
+    - Proceed sequentially through these tasks:
+      1. **IPDAi:** "instructional_planning_task" – build course foundation using {}.
+      2. **CAuthAi:** "content_authoring_task" – develop instructional content and activities.
+      3. **TFDAi:** "technical_design_task" – create LMS implementation plan.
+      4. **EditorAi:** "content_review_task" – review and enhance materials for quality and accessibility.
+      5. **EthosAi:** "ethical_audit_task" – perform ethical and UDL compliance audit.
+    - After each delegation, summarize the results in conversational Markdown for the user.
+    - Remain in the loop throughout — the Coordinator is the *only agent* that speaks to the human.
 
     ---
-    🧠 **Your dual goals:**
-    1. Respond in a warm, academic tone — use friendly Markdown to speak to the human.  
-      - Acknowledge the user's course request when the user submits the form.
-       - Summarize and reflect on what the user said.
-       - Show current course request in FULL Markdown format.  
-       - (ONLY WHEN NECESSARY) Suggest refinements or improvements to the title, description, or expectations.  
-       - Never show raw JSON to the user.  
-    2. After your Markdown reply, **append a JSON block** that includes *only the updated fields* of the course request.  
-       - Always use the same schema keys as the Pydantic model:  
-         `course_title`, `course_description`, `course_credits`, `course_duration_weeks`, `course_level`, `course_expectations`, `course_modules`
-       - Include only the fields that have changed or been refined in this message.  
-       - If nothing changed, output `{}` inside the JSON.
-
-    ---
-    Example Output Format after the user provides feedback(strictly follow this):
+    ✅ **Output Format Example**
 
     ```
-    Thanks! Here's the refined version based on your input:
-    **Course Title:** course_title
-    **Course Description:** course_description
-    **Course Credits:** course_credits
-    **Course Duration:** course_duration_weeks
-    **Course Level:** course_level
-    **Course Expectations:** course_expectations
+    Thank you for the update! Here's the refined version:
+
+    **Course Title:** Introduction to Machine Learning  
+    **Course Description:** This course covers core ML concepts and applications.  
+    **Course Credits:** 3  
+    **Duration:** 16 weeks  
+    **Level:** Undergraduate - Introductory  
+    **Expectations:** Students will train and deploy ML models using Python and PyTorch.  
 
     ```json
     {
-      "course_description": "This course introduces key ML concepts including supervised and unsupervised learning.",
-      "course_expectations": "Students will train and deploy ML models using Python."
+      "course_description": "This course covers core ML concepts and applications.",
+      "course_expectations": "Students will train and deploy ML models using Python and PyTorch."
     }
     ```
     ```
 
-  expected_output: >
-    A Markdown-formatted conversational reply **followed by a JSON block**.
-    The JSON must always be enclosed in triple backticks with the `json` language tag
-    (```json ... ```). It should represent partial or complete updates to the course request.
-  human_input: false
+    Later (after approval), the Coordinator might say:
 
+    ```
+    ✅ Approved! Delegating to IPDAi for course foundation...
+    📘 IPDAi completed the course foundation.  
+    Now delegating to CAuthAi for content authoring...
+    ...
+    🎓 Final HAILEI Course Design Summary:
+    - Course: Introduction to Machine Learning  
+    - Duration: 16 weeks  
+    - Level: Undergraduate - Introductory  
+    - Frameworks: KDKA, PRRR, Bloom’s Taxonomy  
+    - Accessibility: UDL-compliant ✅  
+    - Ethical Review: Passed ✅
+    ```
+  expected_output: >
+    A Markdown-formatted conversational reply **followed by a JSON block** enclosed in triple backticks (` ```json ... ``` `),
+    representing updated course fields or an empty `{}` if none changed.
+    When the user approves, the Coordinator should produce a sequential Markdown summary of each delegated stage
+    (IPDAi → CAuthAi → TFDAi → EditorAi → EthosAi) and conclude with a comprehensive course design summary.
+  human_input: false
 
 
   
@@ -70,11 +104,11 @@ instructional_planning_task:
     - Duration: {course_duration_weeks} weeks
     - Level: {course_level}
     - Expectations: {course_expectations}
-    - Modules: {course_modules}
+
     
     REQUIRED FRAMEWORK INPUTS:
-    - KDKA Model: {kdka_model}
-    - PRRR Framework: {prrr_model}
+    - KDKA Model: {kdka_framework}
+    - PRRR Framework: {prrr_framework}
     
     Create:
     1. Refined course title and description (if needed)
@@ -96,7 +130,7 @@ content_authoring_task:
     As CAuthAi, develop comprehensive instructional content based on IPDAi's course foundation:
     
     Foundation Context: Use the course foundation created by IPDAi
-    PRRR Framework: {prrr_model}
+    - PRRR Framework: {prrr_framework}
     
     Generate for each module:
     1. PRRR-based learning activities (Personal, Relatable, Relative, Real-world)

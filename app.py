@@ -17,7 +17,7 @@ load_dotenv()
 # Initialize HAILEI Crew (Coordinator only)
 # ------------------------------------------
 hailei_crew = HaileiCrew()
-crew = hailei_crew.crew()
+# crew = hailei_crew.crew()
 
 # ------------------------------------------
 # Global session course storage
@@ -57,7 +57,6 @@ def run_coordinator_agent(course_title, description, credits, duration_weeks, le
         "course_duration_weeks": int(duration_weeks),
         "course_level": level,
         "course_expectations": expectations.strip(),
-        "course_modules": []
     }
 
     # Initialize coordinator state
@@ -66,7 +65,7 @@ def run_coordinator_agent(course_title, description, credits, duration_weeks, le
     print("[DEBUG] Initial course_request:", coordinator_state.course_request.dict())
 
     # --- Kick off Coordinator ---
-    response = crew.kickoff(inputs=coordinator_state.dict())
+    response = hailei_crew.kickoff(coordinator_state)
     raw_reply = getattr(response, "raw_output", str(response))
 
     # --- Extract JSON from reply ---
@@ -118,7 +117,7 @@ def coordinator_chat(message, history):
     # Add user message to conversation history
     coordinator_state.add_user_message(message)
 
-    response = crew.kickoff(inputs=coordinator_state.dict())
+    response = hailei_crew.kickoff(coordinator_state)
 
     raw_reply = getattr(response, "raw_output", str(response))
 

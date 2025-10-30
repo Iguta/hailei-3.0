@@ -2,14 +2,9 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from pydantic import BaseModel, Field
 from typing import List, Optional
-# from crewai.memory import LocalMemory
-
-# memory = LocalMemory(
-#     session_id="coordinator_session",
-#     memory_type="conversation",
-#     memory_format="markdown",
-#     max_entries=100,
-# )
+from frameworks import KDKA_FRAMEWORK, PRRR_FRAMEWORK
+from tools.blooms_taxonomy_tool import blooms_taxonomy_tool
+from models.cordinator_state import CoordinatorState
 
 # ---------------------
 # Define Pydantic schemas
@@ -46,12 +41,13 @@ class HaileiCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
+
     # ---------- AGENTS ----------
     @agent
     def coordinator_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['hailei4t_coordinator_agent'],
-            verbose=True,
+            verbose=True
         )
 
     @agent
@@ -59,6 +55,7 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['ipdai_agent'],
             verbose=True,
+            tools=[blooms_taxonomy_tool]
         )
 
     @agent
@@ -126,16 +123,34 @@ class HaileiCrew():
     def crew(self) -> Crew:
         """Creates the HAILEI agent crew"""
         return Crew(
-            agents=[self.coordinator_agent()],
-            tasks=[self.coordination_task()],    # collected automatically HAILEI requires coordination
-            verbose=True,
+            agents=[self.ipdai_agent()],
+            tasks=[self.coordination_task(), self.instructional_planning_task() ],  
+            process=Process.hierarchical,
+            manager_agent=self.coordinator_agent(),
+            verbose=False,
             memory=True,
         )
 
-    def kickoff(self, course_request: dict):
+    def kickoff(self, coordinator_state: CoordinatorState):
         """Kick off the HAILEI crew"""
+        course_request = coordinator_state.course_request
         return self.crew().kickoff(
             inputs={
-                "course_request": course_request
+                "course_request": course_request.dict(), #conver from Pydantic to dict,
+                "course_title": course_request.course_title,
+                "course_description": course_request.course_description,
+                "course_credits": course_request.course_credits,
+                "course_duration_weeks": course_request.course_duration_weeks,
+                "course_level": course_request.course_level,
+                "course_expectations": course_request.course_expectations,
+        
+
+                # other fields for the task
+                "conversation_history": coordinator_state.conversation_history,
+                "last_user_message": coordinator_state.last_user_message,
+
+                #framework data
+                "kdka_framework": KDKA_FRAMEWORK,
+                "prrr_framework": PRRR_FRAMEWORK,
             }
             )

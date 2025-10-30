@@ -3,9 +3,12 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class CourseModule(BaseModel):
-    title: str
-    description: Optional[str] = None
-    learning_objectives: Optional[List[str]] = None
+    title: str = Field(..., min_length=5, description="The title of the module")
+    description: str = Field(..., min_length=10, description="Short summary of the module")
+    learning_objectives: List[str] = Field(..., description="List of learning objectives for the module")
+
+class CourseFoundation(BaseModel):
+    modules: List[CourseModule] = Field(..., description="List of modules for the course")
 
 
 class CourseRequest(BaseModel):
@@ -15,4 +18,4 @@ class CourseRequest(BaseModel):
     course_duration_weeks: int = Field(..., gt=0, description="Course duration in weeks")
     course_level: str = Field(..., description="Academic level (e.g., Undergraduate, Graduate)")
     course_expectations: str = Field(..., min_length=10, description="What students are expected to achieve")
-    course_modules: Optional[List[CourseModule]] = None
+
