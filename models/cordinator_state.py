@@ -11,12 +11,14 @@ class CoordinatorState(BaseModel):
     course_request: Optional[CourseRequest] = None
     conversation_history: List[Message] = Field(default_factory=list)
     last_user_message: Optional[str] = None
+    approved: bool = False
 
     def reset(self):
         """Reset state for a new session."""
         self.course_request = None
         self.conversation_history = []
         self.last_user_message = None
+        self.approved = False
 
     def add_user_message(self, message: str):
         """Record a user message."""

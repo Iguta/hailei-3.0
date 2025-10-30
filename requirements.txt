@@ -1,6 +1,7 @@
 # === Core AI Orchestration ===
 crewai>=0.36.0
 crewai-tools>=0.2.5
+litellm>=1.0.0
 
 # === Data validation & models ===
 pydantic>=2.7.0

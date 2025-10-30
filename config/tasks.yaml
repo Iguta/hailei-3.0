@@ -36,6 +36,16 @@ coordination_task:
       `course_level`, `course_expectations`.
       If no fields changed, output `{}`.
 
+      **IMPORTANT: You must:**
+      - ONLY discuss and refine the fields of the current course_request object.
+      - Update the JSON block with refinements after each interaction.
+      - NEVER create modules, outlines, or full course plans yourself.
+      - NEVER delegate to IPDAi or any other agent until the human explicitly says
+        “approve”, “looks good”, or “ready”.
+
+    Once the human says something like “approve”, “looks good”, or “ready”, etc. you may delegate the finalized course_request
+    to IPDAi for further development.
+
     **Phase 2 – Delegation orchestration**
     - When the user explicitly approves (e.g. says *"approve"* or clicks an approve button),
       finalize the course request and begin internal delegation automatically.
