@@ -3,8 +3,7 @@ import os
 import json, re
 from dotenv import load_dotenv
 from crew import HaileiCrew
-from models.course_request import CourseRequest
-from models.cordinator_state import CoordinatorState
+from models.models import CoordinatorState, CourseRequest
 
 # ------------------------------------------
 # Setup

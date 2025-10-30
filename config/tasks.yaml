@@ -220,3 +220,28 @@ ethical_audit_task:
     Final ethical audit report with compliance certification and any
     required modifications for ethical standards adherence.
   human_input: false
+
+searchai_task:
+  agent: searchai_agent
+  description: >
+    As SearchAi, perform comprehensive resource discovery and curation for the course:
+    
+    Course Context: Use the course foundation from IPDAi and content from CAuthAi
+    
+    Search and curate educational resources:
+    1. Identify high-quality academic resources (readings, textbooks, research papers)
+    2. Find relevant multimedia content (videos, simulations, interactive tools)
+    3. Discover open educational resources (OER) aligned with course objectives
+    4. Curate case studies and real-world examples that support learning objectives
+    5. Verify resource accessibility and availability
+    6. Document relevance and rationale for each resource
+    
+    Use the Resource Search Tool to perform semantic searches by topic.
+    Focus on current, verifiable sources from trusted academic platforms.
+    Ensure resources support KDKA and PRRR framework integration.
+    Maintain academic integrity and currency of all curated materials.
+  expected_output: >
+    Comprehensive resource curation report with curated knowledge artifacts,
+    including titles, URLs, descriptions, relevance rationale, and curation notes
+    organized by course modules or topics.
+  human_input: false

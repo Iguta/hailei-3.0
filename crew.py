@@ -1,35 +1,16 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from pydantic import BaseModel, Field
-from typing import List, Optional
 from frameworks import KDKA_FRAMEWORK, PRRR_FRAMEWORK
 from tools.blooms_taxonomy_tool import blooms_taxonomy_tool
-from models.cordinator_state import CoordinatorState
-
-# ---------------------
-# Define Pydantic schemas
-# ---------------------
-class CourseModule(BaseModel):
-    title: str
-    description: Optional[str] = None
-    learning_objectives: Optional[List[str]] = None
-
-
-class CourseFoundation(BaseModel):
-    course_title: str
-    course_description: str
-    credits: int
-    duration_weeks: int
-    level: str
-    expectations: str
-    modules: List[CourseModule]
-
-
-class CourseAuditReport(BaseModel):
-    ethical_compliance: bool
-    udl_compliance: bool
-    accessibility_passed: bool
-    notes: str
+from models.models import (
+    CoordinatorState,
+    CourseFoundation,
+    CourseAuditReport,
+    CourseContent,
+    CourseTechnicalDesign,
+    CourseContentReview,
+    CourseSearchReport,
+)
 
 
 # ---------------------
@@ -77,6 +58,7 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['editorai_agent'],
             verbose=True,
+            output_pydantic=CourseContent,
         )
 
     @agent
@@ -84,6 +66,7 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['ethosai_agent'],
             verbose=True,
+            output_pydantic=CourseAuditReport,
         )
 
     @agent
@@ -91,6 +74,7 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['searchai_agent'],
             verbose=True,
+            output_pydantic=CourseSearchReport,
         )
 
     # ---------- TASKS ----------
@@ -108,6 +92,28 @@ class HaileiCrew():
             verbose=True,
             output_pydantic=CourseFoundation,
         )
+    
+    @task
+    def content_authoring_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['content_authoring_task'],
+            verbose=True,
+            output_pydantic=CourseContent,
+        )
+    @task
+    def technical_design_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['technical_design_task'],
+            verbose=True,
+            output_pydantic=CourseTechnicalDesign,
+        )
+    @task
+    def content_review_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['content_review_task'],
+            verbose=True,
+            output_pydantic=CourseContentReview,
+        )
 
     @task
     def ethical_audit_task(self) -> Task:
@@ -116,6 +122,15 @@ class HaileiCrew():
             verbose=True,
             output_pydantic=CourseAuditReport,
         )
+    
+    @task
+    def searchai_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['searchai_task'],
+            verbose=True,
+            output_pydantic=CourseSearchReport,
+        )
+    
 
     # ==================================================
     # PHASE 1: Coordinator Crew (before approval)
@@ -145,10 +160,15 @@ class HaileiCrew():
                 self.tfdai_agent(),
                 self.editorai_agent(),
                 self.ethosai_agent(),
+                self.searchai_agent(),
             ],
             tasks=[
                 self.instructional_planning_task(),
+                self.content_authoring_task(),
+                self.technical_design_task(),
+                self.content_review_task(),
                 self.ethical_audit_task(),
+                self.searchai_task(),
             ],
             process=Process.hierarchical,
             manager_agent=self.coordinator_agent(),
@@ -192,6 +212,7 @@ class HaileiCrew():
                 "course_expectations": course_request.course_expectations,
                 "conversation_history": coordinator_state.formatted_history(),
                 "last_user_message": coordinator_state.last_user_message,
+                "lms_platform": "To be determined",  # Default value, can be customized later
                 "kdka_framework": KDKA_FRAMEWORK,
                 "prrr_framework": PRRR_FRAMEWORK,
             }
