@@ -37,6 +37,7 @@ class HaileiCrew():
             config=self.agents_config['ipdai_agent'],
             verbose=True,
             tools=[blooms_taxonomy_tool],
+            
         )
 
     @agent
@@ -58,7 +59,6 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['editorai_agent'],
             verbose=True,
-            output_pydantic=CourseContent,
         )
 
     @agent
@@ -66,7 +66,6 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['ethosai_agent'],
             verbose=True,
-            output_pydantic=CourseAuditReport,
         )
 
     @agent
@@ -74,7 +73,6 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['searchai_agent'],
             verbose=True,
-            output_pydantic=CourseSearchReport,
         )
 
     # ---------- TASKS ----------
@@ -130,7 +128,14 @@ class HaileiCrew():
             verbose=True,
             output_pydantic=CourseSearchReport,
         )
-    
+
+    # @task
+    # def design_orchestration_task(self) -> Task:
+    #     return Task(
+    #         config=self.tasks_config['design_orchestration_task'],
+    #         verbose=True,
+    #     )
+
 
     # ==================================================
     # PHASE 1: Coordinator Crew (before approval)
@@ -152,7 +157,7 @@ class HaileiCrew():
     # ==================================================
     @crew
     def design_crew(self) -> Crew:
-        """Crew responsible for instructional planning and audits after approval."""
+        """Crew responsible for completing the course design after approval."""
         return Crew(
             agents=[
                 self.ipdai_agent(),
@@ -161,6 +166,7 @@ class HaileiCrew():
                 self.editorai_agent(),
                 self.ethosai_agent(),
                 self.searchai_agent(),
+            
             ],
             tasks=[
                 self.instructional_planning_task(),
@@ -169,10 +175,12 @@ class HaileiCrew():
                 self.content_review_task(),
                 self.ethical_audit_task(),
                 self.searchai_task(),
+                # self.design_orchestration_task(),
             ],
-            process=Process.sequential,
+            process=Process.hierarchical,
+            manager_agent=self.coordinator_agent(),
             verbose=True,
-            memory=True,
+            memory=False,
         )
 
     # ==================================================
@@ -194,6 +202,7 @@ class HaileiCrew():
                 "last_user_message": coordinator_state.last_user_message,
                 "kdka_framework": KDKA_FRAMEWORK,
                 "prrr_framework": PRRR_FRAMEWORK,
+                "approved": coordinator_state.approved,
             }
         )
 
@@ -211,8 +220,9 @@ class HaileiCrew():
                 "course_expectations": course_request.course_expectations,
                 "conversation_history": coordinator_state.formatted_history(),
                 "last_user_message": coordinator_state.last_user_message,
-                "lms_platform": "To be determined",  # Default value, can be customized later
                 "kdka_framework": KDKA_FRAMEWORK,
                 "prrr_framework": PRRR_FRAMEWORK,
+                "lms_platform": "Canvas", # can be changed to Edx, Moodle, etc.
+                "approved": coordinator_state.approved,
             }
         )

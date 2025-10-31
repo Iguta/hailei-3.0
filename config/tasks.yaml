@@ -2,13 +2,14 @@ coordination_task:
   agent: coordinator_agent
   description: >
     Engage in a natural, human-centered conversation with the educator to refine and finalize
-    their course request, and then coordinate the subsequent HAILEI agentic design process.
+    their course request. This task is strictly for feedback/chat (pre-approval) and must not
+    perform any internal design orchestration.
 
     ---
     Current course request:
-    ```json
+    `json
     {course_request}
-    ```
+    `
     {%if last_user_message%}
     User message:
       {last_user_message}
@@ -20,51 +21,24 @@ coordination_task:
     {%endif%}
     ---
 
-    🧠 **Your responsibilities:**
-
-    **Phase 1 – Conversational refinement**
+    Your responsibilities (Chat Mode):
     - Respond in a warm, professional, academic tone using Markdown.
-    - Acknowledge and summarize the educator’s input naturally.
+    - Acknowledge and summarize the educator's input naturally.
     - Show a clean Markdown summary of the current course details (no raw JSON).
-    - Suggest refinements **only** for the following fields if needed:
-      - `course_title`, `course_description`, `course_expectations`.
-      - Do *not* ask about other fields (credits, audience, assessments, etc.).
-    - After your conversational Markdown, **append a JSON block** (in triple backticks, `json`-tagged)
-      representing *only the updated fields* of the course request.  
-      Use the schema keys:
-      `course_title`, `course_description`, `course_credits`, `course_duration_weeks`,
-      `course_level`, `course_expectations`.
-      If no fields changed, output `{}`.
+    - Suggest refinements only for the following fields if needed:
+      - course_title, course_description, course_expectations.
+      - Do not ask about other fields (credits, audience, assessments, etc.).
+    - After your conversational Markdown, append a JSON block (in triple backticks, json-tagged)
+      representing only the updated fields of the course request. Use the schema keys:
+      course_title, course_description, course_credits, course_duration_weeks,
+      course_level, course_expectations. If no fields changed, output {}.
 
-      **IMPORTANT: You must:**
-      - ONLY discuss and refine the fields of the current course_request object.
-      - Update the JSON block with refinements after each interaction.
-      - NEVER create modules, outlines, or full course plans yourself.
-      - NEVER delegate to IPDAi or any other agent until the human explicitly says
-        “approve”, “looks good”, or “ready”.
-
-    Once the human says something like “approve”, “looks good”, or “ready”, etc. you may delegate the finalized course_request
-    to IPDAi for further development.
-
-    **Phase 2 – Delegation orchestration**
-    - When the user explicitly approves (e.g. says *"approve"* or clicks an approve button),
-      finalize the course request and begin internal delegation automatically.
-    - Proceed sequentially through these tasks:
-      1. **IPDAi:** "instructional_planning_task" – build course foundation using {}.
-      2. **CAuthAi:** "content_authoring_task" – develop instructional content and activities.
-      3. **TFDAi:** "technical_design_task" – create LMS implementation plan.
-      4. **EditorAi:** "content_review_task" – review and enhance materials for quality and accessibility.
-      5. **EthosAi:** "ethical_audit_task" – perform ethical and UDL compliance audit.
-    - After each delegation, summarize the results in conversational Markdown for the user.
-    - Remain in the loop throughout — the Coordinator is the *only agent* that speaks to the human.
-
-    ---
     ✅ **Output Format Example**
 
     ```
     Thank you for the update! Here's the refined version:
 
-    **Course Title:** Introduction to Machine Learning  
+    **Course Title:** IntroductioBy the conclusion of this course, students will be proficient in deploying simple machine learning models, analyzing data sets, and engaging in critical discussions about the societal impacts and ethical aspects of AIn to Machine Learning  
     **Course Description:** This course covers core ML concepts and applications.  
     **Course Credits:** 3  
     **Duration:** 16 weeks  
@@ -79,31 +53,22 @@ coordination_task:
     ```
     ```
 
-    Later (after approval), the Coordinator might say:
+    IMPORTANT:
+    - ONLY discuss and refine the fields of the current course_request object.
+    - Update the JSON block with refinements after each interaction.
+    - NEVER create modules, outlines, or full course plans yourself.
+    - NEVER trigger or describe internal design delegation; that is handled by the Coordinator Agent.
+    
 
-    ```
-    ✅ Approved! Delegating to IPDAi for course foundation...
-    📘 IPDAi completed the course foundation.  
-    Now delegating to CAuthAi for content authoring...
-    ...
-    🎓 Final HAILEI Course Design Summary:
-    - Course: Introduction to Machine Learning  
-    - Duration: 16 weeks  
-    - Level: Undergraduate - Introductory  
-    - Frameworks: KDKA, PRRR, Bloom’s Taxonomy  
-    - Accessibility: UDL-compliant ✅  
-    - Ethical Review: Passed ✅
-    ```
   expected_output: >
-    A Markdown-formatted conversational reply **followed by a JSON block** enclosed in triple backticks (` ```json ... ``` `),
-    representing updated course fields or an empty `{}` if none changed.
-    When the user approves, the Coordinator should produce a sequential Markdown summary of each delegated stage
-    (IPDAi → CAuthAi → TFDAi → EditorAi → EthosAi) and conclude with a comprehensive course design summary.
+    A Markdown-formatted conversational reply followed by a JSON block enclosed in triple backticks (`json ... `),
+    representing updated course fields or an empty {} if none changed.
   human_input: false
-
-
   
+
+
 instructional_planning_task:
+  agent: ipdai_agent
   description: >
     As IPDAi, create comprehensive course foundation using HAILEI frameworks:
     
@@ -140,6 +105,7 @@ instructional_planning_task:
   human_input: false
 
 content_authoring_task:
+  agent: cauthai_agent
   description: >
     As CAuthAi, develop comprehensive instructional content based on IPDAi's course foundation:
     
@@ -167,6 +133,7 @@ content_authoring_task:
   human_input: false
 
 technical_design_task:
+  agent: tfdai_agent
   description: >
     As TFDAi, create LMS implementation plan for the educational content from CAuthAi:
     
@@ -194,6 +161,7 @@ technical_design_task:
   human_input: false
 
 content_review_task:
+  agent: editorai_agent
   description: >
     As EditorAi, perform comprehensive quality enhancement on all previous agent outputs:
     
@@ -219,6 +187,7 @@ content_review_task:
   human_input: false
 
 ethical_audit_task:
+  agent: ethosai_agent
   description: >
     As EthosAi, conduct final ethical compliance review on the complete course package:
     
@@ -273,3 +242,25 @@ searchai_task:
     including titles, URLs, descriptions, relevance rationale, and curation notes
     organized by course modules or topics.
   human_input: false
+# design_orchestration_task:
+#   agent: coordinator_agent
+#   description: >
+#     Design Mode orchestration after approval. As the Coordinator, operate in hierarchical
+#     manager mode to coordinate internal agents without contacting the educator.
+
+#     When the user explicitly approves (e.g., says "approve" or clicks Approve), finalize
+#     the course request and begin internal delegation automatically. Work autonomously.
+
+#     Proceed in this order:
+#       1. IPDAi: instructional_planning_task - build course foundation.
+#       2. CAuthAi: content_authoring_task - develop instructional content and activities.
+#       3. TFDAi: technical_design_task - create LMS implementation plan.
+#       4. EditorAi: content_review_task - review/enhance for quality and accessibility.
+#       5. EthosAi: ethical_audit_task - perform ethical and UDL compliance audit.
+#       6. SearchAi: searchai_task - curate resources as needed.
+
+#     After each delegation, compile an internal summary and prepare a concise user-facing
+#     summary at the end. Do NOT ask the educator questions during this phase.
+#   expected_output: >
+#     A sequential Markdown summary of each delegated stage and a final HAILEI Course Design Summary.
+#   human_input: false

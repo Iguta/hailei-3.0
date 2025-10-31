@@ -1,9 +1,15 @@
 import gradio as gr
 import os
 import json, re
+import sys
 from dotenv import load_dotenv
 from crew import HaileiCrew
 from models.models import CoordinatorState, CourseRequest
+
+# Set UTF-8 encoding for stdout/stderr to handle emojis in CrewAI logs
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 # ------------------------------------------
 # Setup
