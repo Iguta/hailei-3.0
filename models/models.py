@@ -1,7 +1,7 @@
 # models/models.py
 # Unified data models for HAILEI course design system
 
-from pydantic import BaseModel, Field, AnyUrl
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 
 # ============================================================================
@@ -72,7 +72,7 @@ class LearningObjective(BaseModel):
 class ModuleResource(BaseModel):
     """Resource associated with a course module."""
     title: str = Field(..., description="The title of the resource")
-    url: Optional[AnyUrl] = Field(None, description="The URL of the resource")
+    url: Optional[str] = Field(None, description="The URL of the resource")
     type: Optional[str] = Field(
         None,
         description="The type of the resource (reading, video, dataset, tool, etc.)",
@@ -102,8 +102,8 @@ class PRRRSignals(BaseModel):
 class CourseModule(BaseModel):
     """Simplified module structure for CourseFoundation (used by IPDAi)."""
     title: str = Field(..., description="The title of the module")
-    description: Field[str] = Field(..., description="The description of the module")
-    learning_objectives: Field[List[LearningObjective]] = Field(..., description="The learning objectives of the module")
+    description: str = Field(..., description="The description of the module")
+    learning_objectives: List[LearningObjective] = Field(..., description="The learning objectives of the module")
 
 
 class CourseFoundation(BaseModel):
@@ -191,7 +191,7 @@ class CourseContentReview(BaseModel):
 class SearchHit(BaseModel):
     """Search result hit from SearchAi."""
     title: str
-    url: Optional[AnyUrl] = None
+    url: Optional[str] = Field(None, description="The URL of the resource")
     description: Optional[str] = None
     relevance_reason: Optional[str] = None
 

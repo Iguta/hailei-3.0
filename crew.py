@@ -170,8 +170,7 @@ class HaileiCrew():
                 self.ethical_audit_task(),
                 self.searchai_task(),
             ],
-            process=Process.hierarchical,
-            manager_agent=self.coordinator_agent(),
+            process=Process.sequential,
             verbose=True,
             memory=True,
         )

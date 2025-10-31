@@ -107,6 +107,9 @@ instructional_planning_task:
   description: >
     As IPDAi, create comprehensive course foundation using HAILEI frameworks:
     
+    **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback or clarification. 
+    This task runs AFTER approval, so use your educational intelligence to create the complete foundation.**
+    
     Course Details:
     - Title: {course_title}
     - Description: {course_description} 
@@ -120,16 +123,17 @@ instructional_planning_task:
     - KDKA Model: {kdka_framework}
     - PRRR Framework: {prrr_framework}
     
-    Create:
-    1. Refined course title and description (if needed)
-    2. Terminal Learning Objectives (TLOs) using Bloom's Taxonomy Tool
-    3. Enabling Learning Objectives (ELOs) mapped to TLOs
-    4. KDKA structure (Knowledge, Delivery, Context, Assessment)
-    5. Weekly module breakdown for {course_duration_weeks} weeks
-    6. Draft syllabus with PRRR integration
+    **Your responsibilities (WORK AUTONOMOUSLY):**
+    1. Create refined course title and description using your expertise
+    2. Generate Terminal Learning Objectives (TLOs) using Bloom's Taxonomy Tool
+    3. Generate Enabling Learning Objectives (ELOs) mapped to TLOs
+    4. Build KDKA structure (Knowledge, Delivery, Context, Assessment) for the course
+    5. Create weekly module breakdown for {course_duration_weeks} weeks based on educational best practices
+    6. Draft complete syllabus with PRRR integration
     
     Use the Bloom's Taxonomy Tool to validate all learning objectives for appropriate cognitive complexity.
-    If any course details are missing, use educational intelligence to populate them appropriately.
+    If any course details are missing, use your educational intelligence to populate them appropriately.
+    DO NOT ask questions or request feedback - create the complete foundation now.
   expected_output: >
     Complete course foundation including draft syllabus, validated learning objectives hierarchy,
     KDKA-structured outline, weekly module plan, and PRRR integration strategy.
@@ -139,9 +143,13 @@ content_authoring_task:
   description: >
     As CAuthAi, develop comprehensive instructional content based on IPDAi's course foundation:
     
+    **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback. 
+    This task runs AFTER approval - use IPDAi's foundation to create complete content independently.**
+    
     Foundation Context: Use the course foundation created by IPDAi
     - PRRR Framework: {prrr_framework}
     
+    **Your responsibilities (WORK AUTONOMOUSLY):**
     Generate for each module:
     1. PRRR-based learning activities (Personal, Relatable, Relative, Real-world)
     2. Detailed lecture outlines with key concepts
@@ -152,6 +160,7 @@ content_authoring_task:
     
     Use the Resource Search Tool to curate high-quality educational resources for each module.
     Ensure content progression supports the specified course level and duration.
+    DO NOT ask questions - create all content autonomously using educational best practices.
   expected_output: >
     Complete instructional content package with learning activities, assessments,
     and curated resources for all course modules in structured format.
@@ -161,9 +170,13 @@ technical_design_task:
   description: >
     As TFDAi, create LMS implementation plan for the educational content from CAuthAi:
     
+    **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback. 
+    This task runs AFTER approval - create the technical design plan independently.**
+    
     Educational Content Context: Use content created by CAuthAi
     Target LMS: {lms_platform}
     
+    **Your responsibilities (WORK AUTONOMOUSLY):**
     Design specifications:
     1. LMS feature mapping (quizzes, discussions, gradebook, media)
     2. Navigation structure and user experience flow
@@ -174,6 +187,7 @@ technical_design_task:
     
     Preserve pedagogical integrity while optimizing for platform capabilities.
     Consider accessibility requirements and Universal Design for Learning principles.
+    DO NOT ask questions - create the complete technical design plan autonomously.
   expected_output: >
     Detailed technical implementation plan with LMS specifications,
     deployment timeline, and integration requirements.
@@ -183,18 +197,22 @@ content_review_task:
   description: >
     As EditorAi, perform comprehensive quality enhancement on all previous agent outputs:
     
+    **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback. 
+    This task runs AFTER approval - review, enhance, and finalize the materials independently.**
+    
     Content for Review: All outputs from IPDAi, CAuthAi, and TFDAi
     
-    Review and enhance:
-    1. Grammar, clarity, and academic tone across all materials
-    2. Accessibility compliance using Accessibility Checker Tool
-    3. Bloom's taxonomy alignment verification using Bloom's Taxonomy Tool
-    4. KDKA framework marker validation
-    5. PRRR principle integration check
-    6. Consistency across all materials and agents' work
+    **Your responsibilities (WORK AUTONOMOUSLY):**
+    1. Review and enhance grammar, clarity, and academic tone across all materials
+    2. Verify accessibility compliance using Accessibility Checker Tool
+    3. Validate Bloom's taxonomy alignment using Bloom's Taxonomy Tool
+    4. Verify KDKA framework marker validation
+    5. Check PRRR principle integration
+    6. Ensure consistency across all materials and agents' work
     
     Use your tools to validate compliance and provide detailed improvement recommendations.
     Generate comprehensive enhancement log documenting all changes and validations.
+    DO NOT ask questions - complete the review and enhancement autonomously.
   expected_output: >
     Polished educational content package with comprehensive editor report
     documenting all enhancements, tool validations, and compliance checks.
@@ -204,8 +222,12 @@ ethical_audit_task:
   description: >
     As EthosAi, conduct final ethical compliance review on the complete course package:
     
+    **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback. 
+    This task runs AFTER approval - perform the audit and provide certification independently.**
+    
     Final Content: All reviewed content from EditorAi
     
+    **Your responsibilities (WORK AUTONOMOUSLY):**
     Comprehensive ethical audit:
     1. AI in Education ethical guidelines compliance
     2. Universal Design for Learning (UDL) verification using Accessibility Checker Tool
@@ -216,6 +238,7 @@ ethical_audit_task:
     
     Use the Accessibility Checker Tool to validate UDL compliance.
     Provide final compliance certification or specific remediation requirements.
+    DO NOT ask questions - complete the audit and certification autonomously.
   expected_output: >
     Final ethical audit report with compliance certification and any
     required modifications for ethical standards adherence.
@@ -226,8 +249,12 @@ searchai_task:
   description: >
     As SearchAi, perform comprehensive resource discovery and curation for the course:
     
+    **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback. 
+    This task runs AFTER approval - curate resources independently based on course context.**
+    
     Course Context: Use the course foundation from IPDAi and content from CAuthAi
     
+    **Your responsibilities (WORK AUTONOMOUSLY):**
     Search and curate educational resources:
     1. Identify high-quality academic resources (readings, textbooks, research papers)
     2. Find relevant multimedia content (videos, simulations, interactive tools)
@@ -240,6 +267,7 @@ searchai_task:
     Focus on current, verifiable sources from trusted academic platforms.
     Ensure resources support KDKA and PRRR framework integration.
     Maintain academic integrity and currency of all curated materials.
+    DO NOT ask questions - complete resource curation autonomously.
   expected_output: >
     Comprehensive resource curation report with curated knowledge artifacts,
     including titles, URLs, descriptions, relevance rationale, and curation notes
