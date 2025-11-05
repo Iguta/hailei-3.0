@@ -208,3 +208,4 @@ __marimo__/
 
 # log files
 crewai_logs_*.log
+crewai_logs_*.txt
