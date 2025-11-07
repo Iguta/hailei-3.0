@@ -284,6 +284,44 @@ design_summary_task:
         - SearchAi → CourseSearchReport for curated resources.
     - When a Pydantic artifact is missing, leave the section heading and add “Not available.”
 
+    Source artifacts:
+    ```json
+    {instructional_planning_task.output}
+    ```
+    ```json
+    {instructional_planning_task.pydantic}
+    ```
+    ```json
+    {content_authoring_task.output}
+    ```
+    ```json
+    {content_authoring_task.pydantic}
+    ```
+    ```json
+    {technical_design_task.output}
+    ```
+    ```json
+    {technical_design_task.pydantic}
+    ```
+    ```json
+    {content_review_task.output}
+    ```
+    ```json
+    {content_review_task.pydantic}
+    ```
+    ```json
+    {ethical_audit_task.output}
+    ```
+    ```json
+    {ethical_audit_task.pydantic}
+    ```
+    ```json
+    {searchai_task.output}
+    ```
+    ```json
+    {searchai_task.pydantic}
+    ```
+
 
     Rendering rules:
     - Be concise and educator-ready; no internal tool chatter or raw JSON.
