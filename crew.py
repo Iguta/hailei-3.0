@@ -1,7 +1,10 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from frameworks import KDKA_FRAMEWORK, PRRR_FRAMEWORK
+from frameworks import KDKA_FRAMEWORK, PRRR_FRAMEWORK, EXAMPLE_COURSE_DESIGN_SUMMARY
 from tools.blooms_taxonomy_tool import blooms_taxonomy_tool
+from tools.accessibility_checker_tool import accessibility_checker_tool
+from tools.resource_search_tool import resource_search_tool
+
 from models.models import (
     CoordinatorState,
     CourseFoundation,
@@ -59,6 +62,7 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['editorai_agent'],
             verbose=True,
+            tools=[accessibility_checker_tool],
         )
 
     @agent
@@ -73,6 +77,7 @@ class HaileiCrew():
         return Agent(
             config=self.agents_config['searchai_agent'],
             verbose=True,
+            tools=[resource_search_tool],
         )
 
     # ---------- TASKS ----------
@@ -136,6 +141,16 @@ class HaileiCrew():
     #         verbose=True,
     #     )
 
+    # add this alongside other @task defs
+    @task
+    def design_summary_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['design_summary_task'],
+            verbose=True
+        )
+
+
+
 
     # ==================================================
     # PHASE 1: Coordinator Crew (before approval)
@@ -176,11 +191,12 @@ class HaileiCrew():
                 self.ethical_audit_task(),
                 self.searchai_task(),
                 # self.design_orchestration_task(),
+                self.design_summary_task(),
             ],
             process=Process.hierarchical,
             manager_agent=self.coordinator_agent(),
             verbose=True,
-            memory=False,
+            memory=True,
         )
 
     # ==================================================
@@ -203,6 +219,7 @@ class HaileiCrew():
                 "kdka_framework": KDKA_FRAMEWORK,
                 "prrr_framework": PRRR_FRAMEWORK,
                 "approved": coordinator_state.approved,
+                "example_course_design_summary": EXAMPLE_COURSE_DESIGN_SUMMARY,
             }
         )
 
@@ -224,5 +241,6 @@ class HaileiCrew():
                 "prrr_framework": PRRR_FRAMEWORK,
                 "lms_platform": "Canvas", # can be changed to Edx, Moodle, etc.
                 "approved": coordinator_state.approved,
+                "example_course_design_summary": EXAMPLE_COURSE_DESIGN_SUMMARY,
             }
         )

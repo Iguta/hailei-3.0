@@ -168,7 +168,7 @@ content_review_task:
     **IMPORTANT: Work autonomously. DO NOT ask the educator for feedback. 
     This task runs AFTER approval - review, enhance, and finalize the materials independently.**
     
-    Content for Review: All outputs from IPDAi, CAuthAi, and TFDAi
+    Content for Review: All outputs from CAuthAi, and TFDAi
     
     **Your responsibilities (WORK AUTONOMOUSLY):**
     1. Review and enhance grammar, clarity, and academic tone across all materials
@@ -199,15 +199,12 @@ ethical_audit_task:
     **Your responsibilities (WORK AUTONOMOUSLY):**
     Comprehensive ethical audit:
     1. AI in Education ethical guidelines compliance
-    2. Universal Design for Learning (UDL) verification using Accessibility Checker Tool
-    3. Privacy and data protection assessment
-    4. Bias detection and inclusivity review
-    5. Cultural sensitivity validation
-    6. Academic integrity safeguards
+    2. Privacy and data protection assessment
+    3. Bias detection and inclusivity review
+    4. Cultural sensitivity validation
+    5. Academic integrity safeguards
     
-    Use the Accessibility Checker Tool to validate UDL compliance.
     Provide final compliance certification or specific remediation requirements.
-    DO NOT ask questions - complete the audit and certification autonomously.
   expected_output: >
     Final ethical audit report with compliance certification and any
     required modifications for ethical standards adherence.
@@ -264,3 +261,35 @@ searchai_task:
 #   expected_output: >
 #     A sequential Markdown summary of each delegated stage and a final HAILEI Course Design Summary.
 #   human_input: false
+
+
+design_summary_task:
+  agent: coordinator_agent
+  description: >
+    As the Coordinator, render a concise, user-facing HAILEI Course Design based on the completed tasks.
+
+    Pay Attention to the following:
+    - The Course Design should be a single Markdown document.
+    - The Couse Design should be based from CAuthAi's output, enriched with the content from SearchAi, and validated by EditorAi and EthosAi, and technical design from TFDAi.
+    - Follow this example template {example_course_design_summary} so sections appear in this order:
+      Course Overview, Objectives, Weekly Highlights, KDKA Integration, PRRR
+      Integration, LMS Implementation, Editor Review, Ethical Audit, Resource
+      Curation, Appendices.
+    - Pull structured data from each task output:
+        - IPDAi → CourseFoundation for overview, objectives, weekly plan, KDKA, PRRR.
+        - CAuthAi → CourseContent for detailed activities/resources.
+        - TFDAi → CourseTechnicalDesign for LMS plan.
+        - EditorAi → CourseContentReview for editorial fixes and accessibility.
+        - EthosAi → CourseAuditReport for ethics compliance.
+        - SearchAi → CourseSearchReport for curated resources.
+    - When a Pydantic artifact is missing, leave the section heading and add “Not available.”
+
+
+    Rendering rules:
+    - Be concise and educator-ready; no internal tool chatter or raw JSON.
+    - No tool usage is required; consolidate outputs already present in memory.
+    - If any upstream artifact is missing, keep the section and write a one-line “Not available”.
+  expected_output: >
+    A clean Markdown summary titled "HAILEI Course Design Summary" suitable to show
+    in the chat.
+  human_input: false

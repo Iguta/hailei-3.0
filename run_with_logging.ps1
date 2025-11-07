@@ -6,7 +6,11 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
-$logFile = "crewai_logs_$(Get-Date -Format 'yyyy-MM-dd_HH-mm-ss').log"
+if (-not (Test-Path -Path ".\logs")) {
+    New-Item -ItemType Directory -Path ".\logs" | Out-Null
+}
+
+$logFile = ".\logs\crewai_logs_$(Get-Date -Format 'yyyy-MM-dd_HH-mm-ss').log"
 
 Write-Host "Starting app with uv and logging..." -ForegroundColor Green
 Write-Host "Log file: $logFile" -ForegroundColor Yellow

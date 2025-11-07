@@ -119,10 +119,8 @@ class CourseFoundation(BaseModel):
 
 class CourseAuditReport(BaseModel):
     """Ethical audit report from EthosAi."""
-    ethical_compliance: bool = Field(..., description="Whether the course is ethically compliant")
-    udl_compliance: bool = Field(..., description="Whether the course is UDL compliant")
-    accessibility_passed: bool = Field(..., description="Whether the course is accessible")
-    notes: str = Field(..., description="Notes on the audit")
+    ethical_compliance: bool = Field(..., description="Whether the course is ethically compliant e.g., privacy, bias, fairness")
+    notes: str = Field(..., description="Notes on the ethical audit")
 
 
 # ============================================================================
@@ -167,25 +165,28 @@ class LMSIntegration(BaseModel):
 
 class CourseTechnicalDesign(BaseModel):
     """Technical design output from TFDAi (technical_design_task)."""
-    course_title: str
-    implementation_plan_markdown: str
-    lms: LMSIntegration = Field(default_factory=LMSIntegration)
-    timeline_weeks: List[str] = Field(default_factory=list)
+    course_title: str = Field(..., description="The title of the course")
+    implementation_plan_markdown: str = Field(..., description="The implementation plan of the course in Markdown")
+    lms: LMSIntegration = Field(default_factory=LMSIntegration, description="The LMS integration details")
+    timeline_weeks: List[str] = Field(default_factory=list, description="The timeline of the course in weeks")
 
 
 class EditFinding(BaseModel):
     """Edit finding from EditorAi."""
-    area: str  # e.g., Clarity, Tone, Accessibility, Consistency
-    issue: str
-    recommendation: str
+    area: str = Field(..., description="The area of the edit finding e.g., Clarity, Tone, Accessibility, Consistency, Grammar")
+    issue: str = Field(..., description="The issue of the edit finding e.g., content is not clear, tone is not professional, accessibility is not compliant, consistency is not maintained")
+    recommendation: str = Field(..., description="The recommendation for the edit finding e.g., improve clarity, use professional tone, ensure accessibility compliance, maintain consistency, improve grammar")
 
 
 class CourseContentReview(BaseModel):
     """Content review output from EditorAi (content_review_task)."""
-    summary_markdown: Optional[str] = None
-    findings: List[EditFinding] = Field(default_factory=list)
-    accessibility_checks: List[str] = Field(default_factory=list)
-    blooms_alignment_notes: Optional[str] = None
+    udl_compliance: bool = Field(..., description="Whether the course is UDL compliant")
+    accessibility_passed: bool = Field(..., description="Whether the course is accessible")
+    summary_markdown: Optional[str] = Field(None, description="The summary of the content review in Markdown")
+    findings: List[EditFinding] = Field(default_factory=list, description="The findings of the content review")
+    accessibility_checks: List[str] = Field(default_factory=list, description="The accessibility checks of the content review")
+    blooms_alignment_notes: Optional[str] = Field(None, description="The blooms alignment notes of the content review")
+    
 
 
 class SearchHit(BaseModel):
@@ -202,6 +203,15 @@ class CourseSearchReport(BaseModel):
     resources: List[SearchHit] = Field(default_factory=list)
     curation_notes: Optional[str] = None
 
+
+# class CourseDesign(BaseModel):
+#     """ Final educator facing course design from the HAILEI4T Course Design Crew. """
+#     course_design: CourseContent,
+#     course_technical_design: CourseTechnicalDesign,
+#     course_editor_review: CourseContentReview,
+#     course_ethical_audit: CourseAuditReport,
+#     course_search_report: CourseSearchReport,
+#     manager_remarks: Optional[str] = Field(None, description="short remarks from the manager about the course design")
 
 # Forward reference resolution
 CoordinatorState.model_rebuild()
